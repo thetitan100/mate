@@ -59,10 +59,13 @@
 </head>
 <body class="flex items-center justify-center min-h-screen p-4">
 
+    <audio id="game-music" src="Escalera.mp3"></audio>
+
     <div id="game-wrapper" class="w-full max-w-2xl mx-auto">
         <!-- Pantalla de Inicio -->
         <div id="start-screen" class="neumorphic-card p-8 sm:p-12 text-center">
             <h1 class="text-4xl sm:text-5xl font-black text-slate-800 mb-3">Desafío Matemático</h1>
+            <h2 class="text-2xl font-bold text-blue-500 mb-8">Edición Final</h2>
             <p class="text-slate-500 mb-10 max-w-md mx-auto">Demuestra tu agilidad mental y alcanza la puntuación más alta.</p>
             <button id="start-btn" class="w-full max-w-xs mx-auto btn-primary font-bold py-4 px-8 text-xl">
                 Comenzar
@@ -118,6 +121,7 @@
         const problemElement = document.getElementById('problem');
         const answersContainer = document.getElementById('answers-container');
         const scoreBreakdownContainer = document.getElementById('score-breakdown');
+        const gameMusic = document.getElementById('game-music');
         
         // --- ESTADO DEL JUEGO ---
         let level, totalScore, correctAnswers, incorrectAnswers, timer, timeLeft, correctAnswerValue;
@@ -133,6 +137,11 @@
             startScreen.classList.add('hidden');
             resultsScreen.classList.add('hidden');
             gameScreen.classList.remove('hidden');
+
+            // --- Control de Música ---
+            gameMusic.currentTime = 0;
+            gameMusic.playbackRate = 1;
+            gameMusic.play();
 
             updateTimerDisplay();
             timer = setInterval(updateTimer, 1000);
@@ -152,9 +161,17 @@
             const timePercentage = (timeLeft / initialTime) * 100;
             timeBar.style.width = `${timePercentage}%`;
             
-            if (timePercentage < 20) timeBar.style.backgroundColor = '#f43f5e';
-            else if (timePercentage < 50) timeBar.style.backgroundColor = '#f59e0b';
-            else timeBar.style.backgroundColor = '#3b82f6';
+            // --- Acelerar música y cambiar color de la barra ---
+            if (timeLeft <= 20) {
+                timeBar.style.backgroundColor = '#f43f5e';
+                gameMusic.playbackRate = 1.25;
+            } else if (timeLeft <= 45) {
+                timeBar.style.backgroundColor = '#f59e0b';
+                gameMusic.playbackRate = 1.1;
+            } else {
+                timeBar.style.backgroundColor = '#3b82f6';
+                gameMusic.playbackRate = 1;
+            }
         }
 
         function generateProblem() {
@@ -163,41 +180,68 @@
             void problemContainer.offsetWidth;
             problemContainer.classList.add('problem-animation');
 
-            const problemTypes = ['simple'];
-            if (level < 4) problemTypes.push('simple');
-            if (level < 6) problemTypes.push('simple');
+            // --- LÓGICA DE DIFICULTAD ACELERADA Y ESTRUCTURADA ---
+            let problemPool = [];
 
-            if (level >= 3) problemTypes.push('compound_mult');
-            if (level >= 4) problemTypes.push('compound_div');
-            if (level >= 5) problemTypes.push('power_root');
-            if (level >= 6) problemTypes.push('advanced_compound');
-            if (level >= 6) problemTypes.push('root_compound');
+            switch (level) {
+                case 1:
+                    problemPool = ['simple_add_sub'];
+                    break;
+                case 2:
+                    problemPool = ['simple_add_sub', 'simple_mult'];
+                    break;
+                case 3:
+                    problemPool = ['simple_mult', 'compound_mult'];
+                    break;
+                case 4:
+                    problemPool = ['compound_mult', 'compound_div'];
+                    break;
+                case 5:
+                    problemPool = ['compound_div', 'power'];
+                    break;
+                case 6:
+                    problemPool = ['power', 'root', 'advanced_compound'];
+                    break;
+                default: // Nivel 7+
+                    problemPool = ['root', 'advanced_compound', 'root_compound'];
+                    break;
+            }
 
-            const chosenType = problemTypes[Math.floor(Math.random() * problemTypes.length)];
+            const chosenType = problemPool[Math.floor(Math.random() * problemPool.length)];
 
             switch (chosenType) {
+                case 'simple_add_sub':      generateSimpleProblem(false); break;
+                case 'simple_mult':         generateSimpleProblem(true); break;
+                case 'simple_div':          generateSimpleProblem(true, true); break;
                 case 'compound_mult':       generateCompoundProblem(); break;
                 case 'compound_div':        generateDivisionCompoundProblem(); break;
-                case 'power_root':          generateRootAndPowerProblem(); break;
+                case 'power':               generatePowerProblem(); break;
+                case 'root':                generateRootProblem(); break;
                 case 'advanced_compound':   generateAdvancedCompoundProblem(); break;
                 case 'root_compound':       generateRootCompoundProblem(); break;
-                default:                    generateSimpleProblem(); break;
+                default:                    generateSimpleProblem(false); break;
             }
             
             generateAnswersUI();
         }
         
-        function generateSimpleProblem() {
-            const op = operations[Math.floor(Math.random() * Math.min(level, 4))];
+        function generateSimpleProblem(allowMult = false, allowDiv = false) {
+            const baseOps = ['+', '-'];
+            if(allowMult) baseOps.push('*');
+            if(allowDiv) baseOps.push('/');
+            
+            const op = baseOps[Math.floor(Math.random() * baseOps.length)];
+            const numRange = level >= 4 ? 15 : 8; // Aumentar rango de números en Nivel 4+
             let num1, num2, problemText;
+
             switch (op) {
                 case '+':
-                    num1 = Math.floor(Math.random() * (level * 8)) + 1;
-                    num2 = Math.floor(Math.random() * (level * 8)) + 1;
+                    num1 = Math.floor(Math.random() * (level * numRange)) + 1;
+                    num2 = Math.floor(Math.random() * (level * numRange)) + 1;
                     correctAnswerValue = num1 + num2; problemText = `${num1} + ${num2}`;
                     break;
                 case '-':
-                    num1 = Math.floor(Math.random() * (level * 8)) + 5;
+                    num1 = Math.floor(Math.random() * (level * numRange)) + 5;
                     num2 = Math.floor(Math.random() * num1) + 1;
                     correctAnswerValue = num1 - num2; problemText = `${num1} - ${num2}`;
                     break;
@@ -216,8 +260,9 @@
         }
         
         function generateCompoundProblem() { // Nivel 3+
-            const num1 = Math.floor(Math.random() * 10) + 1;
-            const num2 = Math.floor(Math.random() * 10) + 2;
+            const numRange = level >= 4 ? 15 : 10;
+            const num1 = Math.floor(Math.random() * numRange) + 1;
+            const num2 = Math.floor(Math.random() * numRange) + 2;
             const num3 = Math.floor(Math.random() * (level > 4 ? 10 : 5)) + 2;
             
             if (Math.random() < 0.5) {
@@ -230,10 +275,11 @@
         }
 
         function generateDivisionCompoundProblem() { // Nivel 4+
-            const b = Math.floor(Math.random() * 8) + 2;
-            const c = Math.floor(Math.random() * 8) + 2;
+            const numRange = level >= 4 ? 12 : 8;
+            const b = Math.floor(Math.random() * numRange) + 2;
+            const c = Math.floor(Math.random() * numRange) + 2;
             const a = b * c;
-            const d = Math.floor(Math.random() * 15) + 1;
+            const d = Math.floor(Math.random() * 20) + 1;
 
             if (Math.random() < 0.5) {
                 problemElement.textContent = `(${a} ÷ ${b}) + ${d}`;
@@ -249,24 +295,28 @@
             }
         }
 
-        function generateRootAndPowerProblem() { // Nivel 5+
-            const a = Math.floor(Math.random() * 8) + 2;
-            const b = Math.floor(Math.random() * 8) + 2;
-            const aSquared = a * a;
+        function generatePowerProblem() { // Nivel 5+
+            const numRange = level >= 4 ? 12 : 8;
+            const a = Math.floor(Math.random() * numRange) + 2;
+            const b = Math.floor(Math.random() * numRange) + 2;
+            problemElement.textContent = `${a}² + ${b}`;
+            correctAnswerValue = (a * a) + b;
+        }
 
-            if (Math.random() < 0.5) {
-                problemElement.textContent = `√${aSquared} + ${b}`;
-                correctAnswerValue = a + b;
-            } else {
-                problemElement.textContent = `${a}² + ${b}`;
-                correctAnswerValue = (a * a) + b;
-            }
+        function generateRootProblem() { // Nivel 6+
+            const numRange = level >= 4 ? 12 : 8;
+            const a = Math.floor(Math.random() * numRange) + 2;
+            const b = Math.floor(Math.random() * numRange) + 2;
+            const aSquared = a * a;
+            problemElement.textContent = `√${aSquared} + ${b}`;
+            correctAnswerValue = a + b;
         }
 
         function generateAdvancedCompoundProblem() { // Nivel 6+
-            const a = Math.floor(Math.random() * 10) + 2;
-            const b = Math.floor(Math.random() * 10) + 2;
-            const c = Math.floor(Math.random() * 5) + 2;
+            const numRange = level >= 4 ? 15 : 10;
+            const a = Math.floor(Math.random() * numRange) + 2;
+            const b = Math.floor(Math.random() * numRange) + 2;
+            const c = Math.floor(Math.random() * 8) + 2;
             const cSquared = c * c;
 
             problemElement.textContent = `(${a} × ${b}) - ${c}²`;
@@ -274,18 +324,18 @@
         }
 
         function generateRootCompoundProblem() { // Nivel 6+
-            const b = Math.floor(Math.random() * 8) + 2;
-            const c = Math.floor(Math.random() * 8) + 2;
-            const aRoot = Math.floor(Math.random() * 8) + 2;
+            const b = Math.floor(Math.random() * 10) + 2;
+            const c = Math.floor(Math.random() * 10) + 2;
+            const aRoot = Math.floor(Math.random() * 10) + 2;
             const a = aRoot * aRoot;
 
             if (Math.random() < 0.5) {
                 problemElement.textContent = `(√${a} + ${b}) × ${c}`;
                 correctAnswerValue = (aRoot + b) * c;
             } else {
-                const dRoot = Math.floor(Math.random() * 5) + 2;
+                const dRoot = Math.floor(Math.random() * 8) + 2;
                 const d = dRoot * dRoot;
-                const e = Math.floor(Math.random() * 10) + 1;
+                const e = Math.floor(Math.random() * 12) + 1;
                 problemElement.textContent = `(${e} × √${d}) - ${b}`;
                 correctAnswerValue = (e * dRoot) - b;
             }
@@ -334,11 +384,12 @@
                 button.style.boxShadow = 'inset 6px 6px 12px #fecdd3, inset -6px -6px 12px #ffe4e6';
                 button.style.color = '#e11d48';
             }
-            setTimeout(() => { generateProblem(); }, 450); // tiempo de respuesta
+            setTimeout(() => { generateProblem(); }, 500);
         }
 
         function endGame() {
             clearInterval(timer);
+            gameMusic.pause();
             
             const totalQuestions = correctAnswers + incorrectAnswers;
             const accuracyFactor = totalQuestions > 0 ? (correctAnswers / totalQuestions) : 0;
@@ -380,6 +431,16 @@
         restartBtn.addEventListener('click', () => {
              resultsScreen.classList.add('hidden');
              startScreen.classList.remove('hidden');
+        });
+
+        // --- Manejo de Loop de Música ---
+        gameMusic.addEventListener('timeupdate', function(){
+            // Búfer pequeño para reiniciar justo antes de que termine
+            const buffer = 0.44; 
+            if(this.currentTime > this.duration - buffer){
+                this.currentTime = 0;
+                this.play();
+            }
         });
 
     </script>
