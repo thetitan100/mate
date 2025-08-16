@@ -3,446 +3,175 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Desafío Matemático: Edición Final</title>
+    <title>HoloMind - Interfaz Principal</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@300;400&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #eef2f9; /* Un azul-gris muy claro */
+        :root {
+            --neon-color: #00ffff;
+            --background-color: #000000;
+            --text-color: #f0f0f0;
+            --subtle-text-color: #cccccc;
+            --hud-frame-color: rgba(0, 255, 255, 0.4);
         }
-        .neumorphic-card {
-            border-radius: 2rem;
-            background: #eef2f9;
-            box-shadow: 8px 8px 16px #c8d0e7, -8px -8px 16px #ffffff;
+
+        body, html {
+            height: 100%;
+            margin: 0;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            overflow: hidden;
+            font-family: 'Roboto', sans-serif;
         }
-        .neumorphic-card-inset {
-            border-radius: 1.5rem;
-            background: #eef2f9;
-            box-shadow: inset 6px 6px 12px #c8d0e7, inset -6px -6px 12px #ffffff;
+
+        /* --- PANTALLA DE BIENVENIDA --- */
+        .splash-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            font-family: 'Orbitron', sans-serif;
+            padding-top: 10vh;
+            box-sizing: border-box;
         }
-        .btn-primary {
-            border-radius: 1rem;
-            background: #eef2f9;
-            box-shadow: 6px 6px 12px #c8d0e7, -6px -6px 12px #ffffff;
+        .logo-kanji h1 { font-size: 8rem; font-weight: 700; color: var(--neon-color); margin: 0; animation: glow-in 3s ease-in-out forwards; }
+        .project-title h2 { font-size: 3.5rem; margin-top: 1rem; letter-spacing: 8px; text-transform: uppercase; opacity: 0; animation: fade-in 2s ease-out 1s forwards; }
+        .creator-info { position: absolute; bottom: 20px; width: 100%; font-size: 1rem; line-height: 1.5; color: var(--subtle-text-color); opacity: 0; animation: fade-in 2s ease-out 2s forwards; }
+        .creator-info p { margin: 0; }
+        .creator-info .names { margin-top: 5px; }
+
+        /* --- MENÚ PRINCIPAL --- */
+        .main-menu-container {
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 100%;
+            padding: 2rem;
+            box-sizing: border-box;
+            opacity: 0;
+            animation: fade-in-menu 1.5s ease-out forwards;
+        }
+        
+        .menu-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.5rem;
+            color: var(--neon-color);
+            text-shadow: 0 0 15px var(--neon-color);
+            margin-bottom: 3rem;
+        }
+
+        /* Contenedor para los botones del menú */
+        .menu-buttons-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2rem; /* Espacio entre botones */
+            width: 100%;
+            max-width: 400px;
+        }
+
+        /* Estilo de los botones del menú */
+        .menu-button {
+            width: 100%;
+            text-align: center;
+            text-decoration: none;
+            color: var(--text-color);
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            border: 1px solid var(--hud-frame-color);
+            background: transparent;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            position: relative;
             transition: all 0.2s ease-in-out;
-            color: #3b82f6; /* blue-500 */
         }
-        .btn-primary:active {
-            box-shadow: inset 6px 6px 12px #c8d0e7, inset -6px -6px 12px #ffffff;
-            font-size: 0.98em;
+        .menu-button:hover {
+            background: var(--neon-color);
+            color: var(--background-color);
+            border-color: var(--neon-color);
+            box-shadow: 0 0 20px var(--neon-color);
         }
-        .answer-btn {
-            border-radius: 1rem;
-            background: #eef2f9;
-            box-shadow: 6px 6px 12px #c8d0e7, -6px -6px 12px #ffffff;
+        .menu-button::before {
+            content: ''; position: absolute; width: 15px; height: 15px;
+            border-color: var(--neon-color); border-style: solid;
+            top: 5px; left: 5px; border-width: 1px 0 0 1px;
             transition: all 0.2s ease-in-out;
-            color: #475569; /* slate-600 */
         }
-        .answer-btn:active {
-            box-shadow: inset 6px 6px 12px #c8d0e7, inset -6px -6px 12px #ffffff;
+        .menu-button:hover::before { border-color: var(--background-color); }
+
+        /* --- Animaciones --- */
+        @keyframes glow-in {
+            from { opacity: 0; text-shadow: 0 0 10px #fff, 0 0 20px var(--neon-color); }
+            to { opacity: 1; text-shadow: 0 0 20px #fff, 0 0 30px var(--neon-color), 0 0 40px var(--neon-color); }
         }
-        .modal-backdrop {
-            background-color: rgba(238, 242, 249, 0.7);
-            backdrop-filter: blur(4px);
+        @keyframes fade-in {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-        .problem-animation {
-            animation: popIn 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
-        }
-        @keyframes popIn {
-            0% { transform: scale(0.5); opacity: 0; }
-            100% { transform: scale(1); opacity: 1; }
+        @keyframes fade-in-menu {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
     </style>
 </head>
-<body class="flex items-center justify-center min-h-screen p-4">
+<body>
 
-    <audio id="game-music" src="Escalera.mp3"></audio>
-
-    <div id="game-wrapper" class="w-full max-w-2xl mx-auto">
-        <!-- Pantalla de Inicio -->
-        <div id="start-screen" class="neumorphic-card p-8 sm:p-12 text-center">
-            <h1 class="text-4xl sm:text-5xl font-black text-slate-800 mb-3">Desafío Matemático</h1>
-            <h2 class="text-2xl font-bold text-blue-500 mb-8">Edición Final</h2>
-            <p class="text-slate-500 mb-10 max-w-md mx-auto">Demuestra tu agilidad mental y alcanza la puntuación más alta.</p>
-            <button id="start-btn" class="w-full max-w-xs mx-auto btn-primary font-bold py-4 px-8 text-xl">
-                Comenzar
-            </button>
+    <!-- Pantalla de Bienvenida -->
+    <div class="splash-container" id="splash">
+        <div class="logo-kanji"><h1>知恵</h1></div>
+        <div class="project-title"><h2>HoloMind</h2></div>
+        <div class="creator-info">
+            <p><strong>Integrantes:</strong></p>
+            <div class="names">
+                <p>Stephanie Rivas | Rosana Jara | Araceli Arce</p>
+                <p>Hansel Cuevas | Giovanni Sosa | Juan José Fernandez</p>
+            </div>
+            <br>
+            <p>Especialidad: Electrónica | Tercer Curso "B"</p>
+            <p>Centro de Capacitación Técnica de Luque - 2025</p>
         </div>
+    </div>
 
-        <!-- Pantalla de Juego -->
-        <div id="game-screen" class="hidden neumorphic-card p-6 sm:p-8">
-            <div class="flex justify-between items-center mb-4 text-slate-600 font-semibold">
-                <span id="level-display" class="text-lg">Nivel: 1</span>
-                <span id="time-display" class="text-lg">Tiempo: 1:30</span>
-            </div>
-            <div class="w-full bg-slate-300 rounded-full h-3 mb-6 overflow-hidden">
-                <div id="time-bar" class="bg-blue-500 h-3 rounded-full transition-all duration-1000 linear"></div>
-            </div>
-            <div id="problem-container" class="neumorphic-card-inset my-10 sm:my-14 py-8">
-                <p id="problem" class="text-center text-4xl sm:text-5xl font-bold text-slate-800"></p>
-            </div>
-            <div id="answers-container" class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6"></div>
-        </div>
-
-        <!-- Modal de Resultados -->
-        <div id="results-screen" class="hidden fixed inset-0 modal-backdrop flex items-center justify-center p-4">
-            <div class="neumorphic-card p-8 text-center w-full max-w-lg">
-                <h2 class="text-3xl font-bold text-slate-800 mb-4">¡Juego Terminado!</h2>
-                <p class="text-slate-500 mb-6">Este es el análisis de tu partida.</p>
-                
-                <div id="score-breakdown" class="neumorphic-card-inset p-6 my-6 text-left space-y-4">
-                    <!-- Contenido generado por JS -->
-                </div>
-                
-                <p class="text-sm font-semibold text-slate-500 mt-6">PUNTUACIÓN FINAL</p>
-                <p id="final-score" class="text-7xl font-black text-blue-500">0</p>
-
-                <button id="restart-btn" class="w-full max-w-xs mx-auto mt-8 btn-primary font-bold py-3 px-6 text-lg">
-                    Jugar de Nuevo
-                </button>
-            </div>
+    <!-- Menú Principal (inicialmente oculto) -->
+    <div class="main-menu-container" id="main-menu">
+        <h2 class="menu-title">MENÚ PRINCIPAL</h2>
+        
+        <div class="menu-buttons-container">
+            <!-- Botón para el visor de videos 3D -->
+            <a href="videos 3d.html" class="menu-button" id="videos-btn">
+                Visor de Modelos 
+            </a>
+            
+            <!-- Botón para el juego de matemáticas -->
+            <a href="matematicas.html" class="menu-button" id="game-btn">
+                Juego Matemático
+            </a>
         </div>
     </div>
 
     <script>
-        // --- ELEMENTOS DEL DOM ---
-        const startScreen = document.getElementById('start-screen');
-        const gameScreen = document.getElementById('game-screen');
-        const resultsScreen = document.getElementById('results-screen');
-        const startBtn = document.getElementById('start-btn');
-        const restartBtn = document.getElementById('restart-btn');
-        const timeBar = document.getElementById('time-bar');
-        const timeDisplay = document.getElementById('time-display');
-        const levelDisplay = document.getElementById('level-display');
-        const problemContainer = document.getElementById('problem-container');
-        const problemElement = document.getElementById('problem');
-        const answersContainer = document.getElementById('answers-container');
-        const scoreBreakdownContainer = document.getElementById('score-breakdown');
-        const gameMusic = document.getElementById('game-music');
-        
-        // --- ESTADO DEL JUEGO ---
-        let level, totalScore, correctAnswers, incorrectAnswers, timer, timeLeft, correctAnswerValue;
-        let correctAnswersByLevel = {};
-        const initialTime = 90;
-        const operations = ['+', '-', '*', '/'];
+        const splashScreen = document.getElementById('splash');
+        const mainMenu = document.getElementById('main-menu');
 
-        function initGame() {
-            level = 1; totalScore = 0; correctAnswers = 0; incorrectAnswers = 0;
-            timeLeft = initialTime;
-            correctAnswersByLevel = {};
-            
-            startScreen.classList.add('hidden');
-            resultsScreen.classList.add('hidden');
-            gameScreen.classList.remove('hidden');
+        // Lógica de transición de Splash a Menú
+        setTimeout(() => {
+            splashScreen.style.transition = "opacity 1s";
+            splashScreen.style.opacity = 0;
 
-            // --- Control de Música ---
-            gameMusic.currentTime = 0;
-            gameMusic.playbackRate = 1;
-            gameMusic.play();
+            setTimeout(() => {
+                splashScreen.style.display = 'none';
+                mainMenu.style.display = 'flex';
+            }, 1000); // Espera a que termine la animación de fade-out
 
-            updateTimerDisplay();
-            timer = setInterval(updateTimer, 1000);
-            generateProblem();
-        }
-
-        function updateTimer() {
-            timeLeft--;
-            updateTimerDisplay();
-            if (timeLeft <= 0) endGame();
-        }
-
-        function updateTimerDisplay() {
-            const minutes = Math.floor(timeLeft / 60);
-            const seconds = timeLeft % 60;
-            timeDisplay.textContent = `Tiempo: ${minutes}:${seconds.toString().padStart(2, '0')}`;
-            const timePercentage = (timeLeft / initialTime) * 100;
-            timeBar.style.width = `${timePercentage}%`;
-            
-            // --- Acelerar música y cambiar color de la barra ---
-            if (timeLeft <= 20) {
-                timeBar.style.backgroundColor = '#f43f5e';
-                gameMusic.playbackRate = 1.25;
-            } else if (timeLeft <= 45) {
-                timeBar.style.backgroundColor = '#f59e0b';
-                gameMusic.playbackRate = 1.1;
-            } else {
-                timeBar.style.backgroundColor = '#3b82f6';
-                gameMusic.playbackRate = 1;
-            }
-        }
-
-        function generateProblem() {
-            levelDisplay.textContent = `Nivel: ${level}`;
-            problemContainer.classList.remove('problem-animation');
-            void problemContainer.offsetWidth;
-            problemContainer.classList.add('problem-animation');
-
-            // --- LÓGICA DE DIFICULTAD ACELERADA Y ESTRUCTURADA ---
-            let problemPool = [];
-
-            switch (level) {
-                case 1:
-                    problemPool = ['simple_add_sub'];
-                    break;
-                case 2:
-                    problemPool = ['simple_add_sub', 'simple_mult'];
-                    break;
-                case 3:
-                    problemPool = ['simple_mult', 'compound_mult'];
-                    break;
-                case 4:
-                    problemPool = ['compound_mult', 'compound_div'];
-                    break;
-                case 5:
-                    problemPool = ['compound_div', 'power'];
-                    break;
-                case 6:
-                    problemPool = ['power', 'root', 'advanced_compound'];
-                    break;
-                default: // Nivel 7+
-                    problemPool = ['root', 'advanced_compound', 'root_compound'];
-                    break;
-            }
-
-            const chosenType = problemPool[Math.floor(Math.random() * problemPool.length)];
-
-            switch (chosenType) {
-                case 'simple_add_sub':      generateSimpleProblem(false); break;
-                case 'simple_mult':         generateSimpleProblem(true); break;
-                case 'simple_div':          generateSimpleProblem(true, true); break;
-                case 'compound_mult':       generateCompoundProblem(); break;
-                case 'compound_div':        generateDivisionCompoundProblem(); break;
-                case 'power':               generatePowerProblem(); break;
-                case 'root':                generateRootProblem(); break;
-                case 'advanced_compound':   generateAdvancedCompoundProblem(); break;
-                case 'root_compound':       generateRootCompoundProblem(); break;
-                default:                    generateSimpleProblem(false); break;
-            }
-            
-            generateAnswersUI();
-        }
-        
-        function generateSimpleProblem(allowMult = false, allowDiv = false) {
-            const baseOps = ['+', '-'];
-            if(allowMult) baseOps.push('*');
-            if(allowDiv) baseOps.push('/');
-            
-            const op = baseOps[Math.floor(Math.random() * baseOps.length)];
-            const numRange = level >= 4 ? 15 : 8; // Aumentar rango de números en Nivel 4+
-            let num1, num2, problemText;
-
-            switch (op) {
-                case '+':
-                    num1 = Math.floor(Math.random() * (level * numRange)) + 1;
-                    num2 = Math.floor(Math.random() * (level * numRange)) + 1;
-                    correctAnswerValue = num1 + num2; problemText = `${num1} + ${num2}`;
-                    break;
-                case '-':
-                    num1 = Math.floor(Math.random() * (level * numRange)) + 5;
-                    num2 = Math.floor(Math.random() * num1) + 1;
-                    correctAnswerValue = num1 - num2; problemText = `${num1} - ${num2}`;
-                    break;
-                case '*':
-                    num1 = Math.floor(Math.random() * (level + 5)) + 2;
-                    num2 = Math.floor(Math.random() * 9) + 2;
-                    correctAnswerValue = num1 * num2; problemText = `${num1} × ${num2}`;
-                    break;
-                case '/':
-                    num2 = Math.floor(Math.random() * (level + 3)) + 2;
-                    correctAnswerValue = Math.floor(Math.random() * 9) + 2;
-                    num1 = correctAnswerValue * num2; problemText = `${num1} ÷ ${num2}`;
-                    break;
-            }
-            problemElement.textContent = problemText;
-        }
-        
-        function generateCompoundProblem() { // Nivel 3+
-            const numRange = level >= 4 ? 15 : 10;
-            const num1 = Math.floor(Math.random() * numRange) + 1;
-            const num2 = Math.floor(Math.random() * numRange) + 2;
-            const num3 = Math.floor(Math.random() * (level > 4 ? 10 : 5)) + 2;
-            
-            if (Math.random() < 0.5) {
-                problemElement.textContent = `${num1} + ${num2} × ${num3}`;
-                correctAnswerValue = num1 + (num2 * num3);
-            } else {
-                problemElement.textContent = `${num1} × ${num2} - ${num3}`;
-                correctAnswerValue = (num1 * num2) - num3;
-            }
-        }
-
-        function generateDivisionCompoundProblem() { // Nivel 4+
-            const numRange = level >= 4 ? 12 : 8;
-            const b = Math.floor(Math.random() * numRange) + 2;
-            const c = Math.floor(Math.random() * numRange) + 2;
-            const a = b * c;
-            const d = Math.floor(Math.random() * 20) + 1;
-
-            if (Math.random() < 0.5) {
-                problemElement.textContent = `(${a} ÷ ${b}) + ${d}`;
-                correctAnswerValue = c + d;
-            } else {
-                correctAnswerValue = c - d;
-                if (correctAnswerValue < 0) {
-                    problemElement.textContent = `${d} + (${a} ÷ ${b})`;
-                    correctAnswerValue = d + c;
-                } else {
-                    problemElement.textContent = `(${a} ÷ ${b}) - ${d}`;
-                }
-            }
-        }
-
-        function generatePowerProblem() { // Nivel 5+
-            const numRange = level >= 4 ? 12 : 8;
-            const a = Math.floor(Math.random() * numRange) + 2;
-            const b = Math.floor(Math.random() * numRange) + 2;
-            problemElement.textContent = `${a}² + ${b}`;
-            correctAnswerValue = (a * a) + b;
-        }
-
-        function generateRootProblem() { // Nivel 6+
-            const numRange = level >= 4 ? 12 : 8;
-            const a = Math.floor(Math.random() * numRange) + 2;
-            const b = Math.floor(Math.random() * numRange) + 2;
-            const aSquared = a * a;
-            problemElement.textContent = `√${aSquared} + ${b}`;
-            correctAnswerValue = a + b;
-        }
-
-        function generateAdvancedCompoundProblem() { // Nivel 6+
-            const numRange = level >= 4 ? 15 : 10;
-            const a = Math.floor(Math.random() * numRange) + 2;
-            const b = Math.floor(Math.random() * numRange) + 2;
-            const c = Math.floor(Math.random() * 8) + 2;
-            const cSquared = c * c;
-
-            problemElement.textContent = `(${a} × ${b}) - ${c}²`;
-            correctAnswerValue = (a * b) - cSquared;
-        }
-
-        function generateRootCompoundProblem() { // Nivel 6+
-            const b = Math.floor(Math.random() * 10) + 2;
-            const c = Math.floor(Math.random() * 10) + 2;
-            const aRoot = Math.floor(Math.random() * 10) + 2;
-            const a = aRoot * aRoot;
-
-            if (Math.random() < 0.5) {
-                problemElement.textContent = `(√${a} + ${b}) × ${c}`;
-                correctAnswerValue = (aRoot + b) * c;
-            } else {
-                const dRoot = Math.floor(Math.random() * 8) + 2;
-                const d = dRoot * dRoot;
-                const e = Math.floor(Math.random() * 12) + 1;
-                problemElement.textContent = `(${e} × √${d}) - ${b}`;
-                correctAnswerValue = (e * dRoot) - b;
-            }
-        }
-
-        function generateAnswersUI() {
-            let answers = new Set([correctAnswerValue]);
-            while (answers.size < 3) {
-                if (answers.size === 1 && level >= 3 && problemElement.textContent.includes('×')) {
-                     const parts = problemElement.textContent.replace(/[()√²]/g, '').split(' ');
-                     let wrongOrderAnswer;
-                     if(parts.includes('+')) wrongOrderAnswer = (parseInt(parts[0]) + parseInt(parts[2])) * parseInt(parts[4]);
-                     else if(parts.includes('-')) wrongOrderAnswer = parseInt(parts[0]) * (parseInt(parts[2]) - parseInt(parts[4]));
-                     if(!isNaN(wrongOrderAnswer) && wrongOrderAnswer !== correctAnswerValue) answers.add(wrongOrderAnswer);
-                }
-                const offset = (Math.floor(Math.random() * 8) + 1) * (Math.random() < 0.5 ? 1 : -1);
-                let wrongAnswer = correctAnswerValue + offset;
-                if (wrongAnswer < 0) wrongAnswer = Math.abs(wrongAnswer) + 1;
-                if (wrongAnswer !== correctAnswerValue && !isNaN(wrongAnswer)) answers.add(wrongAnswer);
-            }
-
-            const shuffledAnswers = Array.from(answers).sort(() => Math.random() - 0.5);
-            answersContainer.innerHTML = '';
-            shuffledAnswers.forEach(answer => {
-                const button = document.createElement('button');
-                button.textContent = answer;
-                button.classList.add('answer-btn', 'font-bold', 'py-5', 'sm:py-6', 'text-2xl', 'sm:text-3xl');
-                button.onclick = () => checkAnswer(answer, button);
-                answersContainer.appendChild(button);
-            });
-        }
-
-        function checkAnswer(selectedAnswer, button) {
-            Array.from(answersContainer.children).forEach(btn => btn.disabled = true);
-            if (selectedAnswer === correctAnswerValue) {
-                correctAnswers++;
-                totalScore += (level + 4);
-                if (!correctAnswersByLevel[level]) correctAnswersByLevel[level] = 0;
-                correctAnswersByLevel[level]++;
-                
-                level = Math.floor(correctAnswers / 3) + 1;
-                button.style.boxShadow = 'inset 6px 6px 12px #99f6e4, inset -6px -6px 12px #ccfbf1';
-                button.style.color = '#0d9488';
-            } else {
-                incorrectAnswers++;
-                button.style.boxShadow = 'inset 6px 6px 12px #fecdd3, inset -6px -6px 12px #ffe4e6';
-                button.style.color = '#e11d48';
-            }
-            setTimeout(() => { generateProblem(); }, 500);
-        }
-
-        function endGame() {
-            clearInterval(timer);
-            gameMusic.pause();
-            
-            const totalQuestions = correctAnswers + incorrectAnswers;
-            const accuracyFactor = totalQuestions > 0 ? (correctAnswers / totalQuestions) : 0;
-            const finalScore = Math.round(totalScore * accuracyFactor);
-
-            displayResults(finalScore, accuracyFactor);
-            gameScreen.classList.add('hidden');
-            resultsScreen.classList.remove('hidden');
-        }
-
-        function displayResults(finalScore, accuracyFactor) {
-            document.getElementById('final-score').textContent = finalScore;
-            
-            let breakdownHTML = `<div class="text-sm text-slate-600 space-y-3">`;
-            
-            breakdownHTML += `<p class="font-semibold text-slate-700">Puntos por Nivel:</p><ul class="list-disc list-inside pl-2 space-y-1">`;
-            if (Object.keys(correctAnswersByLevel).length === 0) {
-                 breakdownHTML += `<li>No hubo aciertos.</li>`;
-            } else {
-                for (const lvl in correctAnswersByLevel) {
-                    const points = correctAnswersByLevel[lvl] * (parseInt(lvl) + 4);
-                    breakdownHTML += `<li>Nivel ${lvl}: ${correctAnswersByLevel[lvl]} aciertos <span class="font-bold text-slate-800">(+${points} pts)</span></li>`;
-                }
-            }
-            breakdownHTML += `</ul><p class="font-bold text-right mt-2">Total Base: ${totalScore} pts</p>`;
-            
-            const accuracyPercentage = (accuracyFactor * 100).toFixed(1);
-            breakdownHTML += `<hr class="my-3 border-slate-300"><p class="font-semibold text-slate-700">Multiplicador de Precisión:</p><ul class="list-disc list-inside pl-2">`;
-            breakdownHTML += `<li>${correctAnswers} de ${correctAnswers + incorrectAnswers} aciertos <span class="font-bold text-slate-800">(${accuracyPercentage}%)</span></li></ul>`;
-            
-            breakdownHTML += `<div class="mt-4 pt-3 border-t border-slate-300 text-center text-xs text-slate-500">
-                <p><span class="font-bold">${totalScore}</span> (base) × <span class="font-bold">${accuracyPercentage}%</span> (precisión) = <span class="font-bold text-lg text-blue-500">${finalScore}</span></p>
-            </div></div>`;
-
-            scoreBreakdownContainer.innerHTML = breakdownHTML;
-        }
-
-        startBtn.addEventListener('click', initGame);
-        restartBtn.addEventListener('click', () => {
-             resultsScreen.classList.add('hidden');
-             startScreen.classList.remove('hidden');
-        });
-
-        // --- Manejo de Loop de Música ---
-        gameMusic.addEventListener('timeupdate', function(){
-            // Búfer pequeño para reiniciar justo antes de que termine
-            const buffer = 0.44; 
-            if(this.currentTime > this.duration - buffer){
-                this.currentTime = 0;
-                this.play();
-            }
-        });
-
+        }, 6000); // Tiempo que dura la pantalla de bienvenida
     </script>
+
 </body>
 </html>
